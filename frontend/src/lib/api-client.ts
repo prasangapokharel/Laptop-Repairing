@@ -3,7 +3,9 @@
  */
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1'
+const API_URL = `${API_BASE_URL}/${API_VERSION}`
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -17,9 +19,9 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     // Add auth token if available
-    const token = localStorage.getItem('auth_token')
+    const token = localStorage.getItem('access_token')
     if (token) {
-      config.headers.Authorization = `Token ${token}`
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
