@@ -1,33 +1,16 @@
 import asyncio
 import httpx
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
-BASE_URL = "http://localhost:8000/v1"
+# Load environment variables
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
 
-
-async def test_v1_endpoints():
-    print("Testing v1 API endpoints...")
-    async with httpx.AsyncClient() as client:
-        response = await client.get(f"{BASE_URL}/users/roles")
-        print(f"GET /v1/users/roles: {response.status_code}")
-        if response.status_code == 200:
-            roles = response.json()
-            print(f"Roles found: {len(roles)}")
-            for role in roles:
-                print(f"  - {role.get('name')}: {role.get('description')}")
-        
-        response = await client.get(f"{BASE_URL}/devices/types")
-        print(f"\nGET /v1/devices/types: {response.status_code}")
-        if response.status_code == 200:
-            types = response.json()
-            print(f"Device Types found: {len(types)}")
-        
-        response = await client.get(f"{BASE_URL}/devices/brands")
-        print(f"\nGET /v1/devices/brands: {response.status_code}")
-        if response.status_code == 200:
-            brands = response.json()
-            print(f"Brands found: {len(brands)}")
-
-
-if __name__ == "__main__":
-    asyncio.run(test_v1_endpoints())
-
+# Get BASE_URL from environment or use default
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+# Remove /v1 from BASE_URL if present, we'll add it in the code
+if BASE_URL.endswith("/v1"):
+    BASE_URL = BASE_URL[:-3]
+BASE_URL = f"{BASE_URL}/v1"

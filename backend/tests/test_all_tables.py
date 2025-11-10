@@ -4,10 +4,18 @@ Ensures 100% table coverage and system flexibility
 """
 import asyncio
 import httpx
+import os
+from pathlib import Path
 from datetime import datetime
 from decimal import Decimal
+from dotenv import load_dotenv
 
-BASE_URL = "http://localhost:8000"
+# Load environment variables
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
+
+# Get BASE_URL from environment or use default
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
 
 class ComprehensiveTableTest:
@@ -593,16 +601,18 @@ class ComprehensiveTableTest:
 async def main():
     # Check if server is running
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{BASE_URL}/health", timeout=2.0)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{BASE_URL}/health", timeout=10.0)
             if response.status_code != 200:
                 print(f"[ERROR] Backend server is not running on {BASE_URL}")
+                print(f"Health check returned status: {response.status_code}")
                 print("Please start the backend server first:")
                 print("  cd backend")
                 print("  uvicorn main:app --reload --host 0.0.0.0 --port 8000")
                 exit(1)
-    except httpx.ConnectError:
+    except (httpx.ConnectError, httpx.ConnectTimeout, httpx.TimeoutException) as e:
         print(f"[ERROR] Backend server is not running on {BASE_URL}")
+        print(f"Connection error: {type(e).__name__}")
         print("Please start the backend server first:")
         print("  cd backend")
         print("  uvicorn main:app --reload --host 0.0.0.0 --port 8000")

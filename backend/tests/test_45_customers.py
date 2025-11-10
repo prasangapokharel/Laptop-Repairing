@@ -5,10 +5,19 @@ Tests system flexibility and API robustness with real-world scenarios
 import asyncio
 import httpx
 import random
+import os
+import sys
+from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
+from dotenv import load_dotenv
 
-BASE_URL = "http://localhost:8000"
+# Load environment variables
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
+
+# Get BASE_URL from environment or use default
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
 
 class CustomerIssueTest:
@@ -550,13 +559,15 @@ class CustomerIssueTest:
         
         # Check if server is running
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(f"{self.base_url}/health", timeout=2.0)
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(f"{self.base_url}/health", timeout=10.0)
                 if response.status_code != 200:
                     print(f"[ERROR] Backend server is not running on {self.base_url}")
+                    print(f"Health check returned status: {response.status_code}")
                     return False
-        except httpx.ConnectError:
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.TimeoutException) as e:
             print(f"[ERROR] Backend server is not running on {self.base_url}")
+            print(f"Connection error: {type(e).__name__}")
             print("Please start the backend server first:")
             print("  cd backend")
             print("  uvicorn main:app --reload --host 0.0.0.0 --port 8000")

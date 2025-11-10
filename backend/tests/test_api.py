@@ -1,8 +1,16 @@
 import asyncio
 import httpx
 import json
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
-BASE_URL = "http://localhost:8000"
+# Load environment variables
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(env_path)
+
+# Get BASE_URL from environment or use default
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
 
 async def test_auth():
