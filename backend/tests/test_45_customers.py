@@ -27,7 +27,7 @@ if BASE_URL.endswith('/v1'):
 class CustomerIssueTest:
     def __init__(self):
         self.base_url = BASE_URL
-        self.api_url = f"{API_URL}/v1"  # API URL with /v1 prefix
+        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.customers = []
         self.devices = []
@@ -132,7 +132,7 @@ class CustomerIssueTest:
             
             if not self.access_token:
                 # Use existing seeded user
-                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
+                login_resp = await client.post(f"{self.api_url}/auth/login", json={
                     "phone": "1234567890",
                     "password": "admin123"
                 })
@@ -219,7 +219,7 @@ class CustomerIssueTest:
                 pass
             
             # Login
-                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
+            login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": customer_data["phone"],
                 "password": customer_data["password"]
             })
@@ -414,7 +414,7 @@ class CustomerIssueTest:
         
         async with httpx.AsyncClient() as client:
             # Get admin token
-                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
+            login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": "1234567890",
                 "password": "admin123"
             })
@@ -458,7 +458,7 @@ class CustomerIssueTest:
             return False
         
         async with httpx.AsyncClient() as client:
-                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
+            login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": "1234567890",
                 "password": "admin123"
             })
@@ -482,8 +482,8 @@ class CustomerIssueTest:
                     }
                     
                     try:
-                    payment_resp = await client.post(
-                        f"{self.api_url}/payments",
+                        payment_resp = await client.post(
+                            f"{self.api_url}/payments",
                             json=payment_data,
                             headers=headers
                         )
@@ -502,7 +502,7 @@ class CustomerIssueTest:
         print("="*70)
         
         async with httpx.AsyncClient() as client:
-                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
+            login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": "1234567890",
                 "password": "admin123"
             })
@@ -565,7 +565,7 @@ class CustomerIssueTest:
         # Check if server is running
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(f"{API_URL}/health", timeout=10.0)
+                response = await client.get(f"{BASE_URL}/health", timeout=10.0)
                 if response.status_code != 200:
                     print(f"[ERROR] Backend server is not running on {self.base_url}")
                     print(f"Health check returned status: {response.status_code}")

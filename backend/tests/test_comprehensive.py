@@ -22,7 +22,7 @@ if BASE_URL.endswith('/v1'):
 class TestRepairOffice:
     def __init__(self):
         self.base_url = BASE_URL
-        self.api_url = f"{API_URL}/v1"  # API URL with /v1 prefix
+        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.refresh_token = None
         self.user_id = None

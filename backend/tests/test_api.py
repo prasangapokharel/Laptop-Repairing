@@ -15,7 +15,7 @@ BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 BASE_URL = BASE_URL.rstrip('/')
 if BASE_URL.endswith('/v1'):
     BASE_URL = BASE_URL[:-3]
-API_URL = f"{API_URL}/v1"  # API URL with /v1 prefix
+API_URL = f"{BASE_URL}/v1"  # API URL with /v1 prefix
 
 
 async def test_auth():

@@ -25,7 +25,7 @@ if BASE_URL.endswith('/v1'):
 class ComprehensiveTableTest:
     def __init__(self):
         self.base_url = BASE_URL
-        self.api_url = f"{API_URL}/v1"  # API URL with /v1 prefix
+        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.refresh_token = None
         self.user_id = None
@@ -607,7 +607,7 @@ async def main():
     # Check if server is running
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(f"{API_URL}/health", timeout=10.0)
+            response = await client.get(f"{BASE_URL}/health", timeout=10.0)
             if response.status_code != 200:
                 print(f"[ERROR] Backend server is not running on {BASE_URL}")
                 print(f"Health check returned status: {response.status_code}")
