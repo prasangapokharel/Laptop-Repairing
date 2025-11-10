@@ -14,7 +14,8 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 @router.post("", response_model=PaymentResponse, status_code=201)
 async def create_payment(data: PaymentCreate, db: AsyncSession = Depends(get_db)):
     order = await db.execute(select(Order).where(Order.id == data.order_id))
-    if not order.scalar_one_or_none():
+    order_obj = order.scalar_one_or_none()
+    if not order_obj:
         raise HTTPException(status_code=404, detail="Order not found")
     
     payment = Payment(
@@ -25,7 +26,8 @@ async def create_payment(data: PaymentCreate, db: AsyncSession = Depends(get_db)
         payment_method=data.payment_method,
         transaction_id=data.transaction_id
     )
-    if data.status == "Paid":
+    
+    if data.status == "Paid" or (data.status == "Partial" and float(data.amount) > 0):
         payment.paid_at = datetime.utcnow()
     
     db.add(payment)
@@ -88,4 +90,4 @@ async def delete_payment(payment_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Payment not found")
     await db.delete(payment)
     await db.commit()
-
+    return None
