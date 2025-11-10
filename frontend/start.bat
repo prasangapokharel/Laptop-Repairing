@@ -31,11 +31,29 @@ echo.
 
 echo [3/4] Activating virtual environment and installing dependencies...
 call venv\Scripts\activate.bat
-pip install -q -r requirements.txt
+
+REM Upgrade pip first
+echo Upgrading pip...
+python -m pip install --upgrade pip --quiet
+
+REM Install build tools for packages that need compilation
+echo Installing build tools...
+python -m pip install --upgrade setuptools wheel --quiet
+
+REM Install dependencies (orjson may require Rust, but has pre-built wheels for Windows)
+echo Installing dependencies...
+python -m pip install -r requirements.txt --quiet
 if errorlevel 1 (
-    echo ERROR: Failed to install dependencies
-    pause
-    exit /b 1
+    echo WARNING: Some dependencies failed to install, trying without cache...
+    python -m pip install -r requirements.txt --no-cache-dir
+    if errorlevel 1 (
+        echo ERROR: Failed to install dependencies
+        echo.
+        echo TIP: If you see Rust/Cargo errors, try installing Rust from https://rustup.rs/
+        echo Or install dependencies manually: pip install -r requirements.txt
+        pause
+        exit /b 1
+    )
 )
 echo OK: Dependencies installed
 echo.
@@ -43,11 +61,29 @@ echo.
 echo [4/4] Running database migrations...
 python -m alembic upgrade head
 if errorlevel 1 (
-    echo WARNING: Migration failed, trying to initialize...
-    python -m alembic revision --autogenerate -m "Initial migration"
+    echo WARNING: Migration failed, checking database connection...
+    echo Trying to initialize migrations...
+    if not exist "alembic\versions" (
+        mkdir alembic\versions
+    )
+    python -m alembic revision --autogenerate -m "Initial migration" 2>nul
     python -m alembic upgrade head
+    if errorlevel 1 (
+        echo ERROR: Database migration failed
+        echo Please check:
+        echo 1. MySQL is running
+        echo 2. Database 'repair' exists
+        echo 3. Database credentials in .env file are correct
+        echo.
+        echo You can skip migrations and start the server anyway
+        echo Press any key to continue anyway, or Ctrl+C to exit...
+        pause
+    ) else (
+        echo OK: Database migrations completed
+    )
+) else (
+    echo OK: Database migrations completed
 )
-echo OK: Database migrations completed
 echo.
 
 echo [5/5] Seeding database (if needed)...
