@@ -2,8 +2,16 @@
 
 ## Base URL
 ```
-http://localhost:8000/v1
+http://localhost:8000
 ```
+
+All API endpoints are prefixed with `/v1`:
+- Authentication: `/v1/auth/*`
+- Users: `/v1/users/*`
+- Devices: `/v1/devices/*`
+- Orders: `/v1/orders/*`
+- Payments: `/v1/payments/*`
+- Assigns: `/v1/assigns/*`
 
 ## Authentication
 
@@ -26,7 +34,7 @@ Authorization: Bearer <access_token>
 ### Authentication Endpoints
 
 #### 1. Register User
-**POST** `/auth/register`
+**POST** `/v1/auth/register`
 
 Create a new user account.
 
@@ -100,7 +108,7 @@ Authenticate user and get tokens.
 ---
 
 #### 3. Refresh Token
-**POST** `/auth/refresh`
+**POST** `/v1/auth/refresh`
 
 Get a new access token using refresh token.
 
@@ -125,7 +133,7 @@ Get a new access token using refresh token.
 ---
 
 #### 4. Logout
-**POST** `/auth/logout`
+**POST** `/v1/auth/logout`
 
 Revoke refresh token.
 
@@ -148,7 +156,7 @@ Revoke refresh token.
 ### User Endpoints
 
 #### 1. List Users
-**GET** `/users`
+**GET** `/v1/users`
 
 Get list of users with pagination.
 
@@ -185,7 +193,7 @@ GET /users?limit=20&offset=0
 ---
 
 #### 2. Get User
-**GET** `/users/{user_id}`
+**GET** `/v1/users/{user_id}`
 
 Get user by ID.
 
@@ -214,7 +222,7 @@ Authorization: Bearer <access_token>
 ---
 
 #### 3. Create User
-**POST** `/users`
+**POST** `/v1/users`
 
 Create a new user (admin only).
 
@@ -251,7 +259,7 @@ Authorization: Bearer <access_token>
 ---
 
 #### 4. Update User
-**PATCH** `/users/{user_id}`
+**PATCH** `/v1/users/{user_id}`
 
 Update user information.
 
@@ -286,7 +294,7 @@ Authorization: Bearer <access_token>
 ---
 
 #### 5. Delete User
-**DELETE** `/users/{user_id}`
+**DELETE** `/v1/users/{user_id}`
 
 Delete user by ID.
 
