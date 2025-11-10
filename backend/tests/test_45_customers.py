@@ -118,7 +118,7 @@ class CustomerIssueTest:
                     })
                     if login_resp.status_code == 200:
                         tokens = login_resp.json()
-                        self.access_token = tokens["access_token"]
+                        self.access_token = tokens.get("access_token")
                 else:
                     login_resp = await client.post(f"{self.api_url}/auth/login", json={
                         "phone": admin_data["phone"],
@@ -126,19 +126,19 @@ class CustomerIssueTest:
                     })
                     if login_resp.status_code == 200:
                         tokens = login_resp.json()
-                        self.access_token = tokens["access_token"]
+                        self.access_token = tokens.get("access_token")
             except:
                 pass
             
             if not self.access_token:
                 # Use existing seeded user
                 login_resp = await client.post(f"{self.api_url}/auth/login", json={
-                    "phone": "1234567890",
-                    "password": "admin123"
+                    "phone": "1111111111",
+                    "password": "adminpass"
                 })
                 if login_resp.status_code == 200:
                     tokens = login_resp.json()
-                    self.access_token = tokens["access_token"]
+                    self.access_token = tokens.get("access_token")
             
             if not self.access_token:
                 return False
@@ -228,7 +228,7 @@ class CustomerIssueTest:
                 return False
             
             tokens = login_resp.json()
-            customer_token = tokens["access_token"]
+            customer_token = tokens.get("access_token", "")
             customer_id = tokens.get("user_id") or register_resp.json().get("id") if register_resp.status_code == 201 else None
             
             if not customer_id:
@@ -414,15 +414,15 @@ class CustomerIssueTest:
         
         async with httpx.AsyncClient() as client:
             # Get admin token
-            login_resp = await client.post(f"{self.api_url}/auth/login", json={
-                "phone": "1234567890",
-                "password": "admin123"
+                login_resp = await client.post(f"{self.api_url}/auth/login", json={
+                "phone": "1111111111",
+                "password": "adminpass"
             })
             if login_resp.status_code != 200:
                 return False
             
             tokens = login_resp.json()
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            headers = {"Authorization": f"Bearer {tokens.get('access_token', '')}"}
             
             # Update random orders to different statuses
             updated = 0
@@ -458,15 +458,15 @@ class CustomerIssueTest:
             return False
         
         async with httpx.AsyncClient() as client:
-            login_resp = await client.post(f"{self.api_url}/auth/login", json={
-                "phone": "1234567890",
-                "password": "admin123"
+                login_resp = await client.post(f"{self.api_url}/auth/login", json={
+                "phone": "1111111111",
+                "password": "adminpass"
             })
             if login_resp.status_code != 200:
                 return False
             
             tokens = login_resp.json()
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            headers = {"Authorization": f"Bearer {tokens.get('access_token', '')}"}
             
             # Get payments for random orders
             payments_created = 0
@@ -502,15 +502,15 @@ class CustomerIssueTest:
         print("="*70)
         
         async with httpx.AsyncClient() as client:
-            login_resp = await client.post(f"{self.api_url}/auth/login", json={
-                "phone": "1234567890",
-                "password": "admin123"
+                login_resp = await client.post(f"{self.api_url}/auth/login", json={
+                "phone": "1111111111",
+                "password": "adminpass"
             })
             if login_resp.status_code != 200:
                 return False
             
             tokens = login_resp.json()
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            headers = {"Authorization": f"Bearer {tokens.get('access_token', '')}"}
             
             queries_passed = 0
             
