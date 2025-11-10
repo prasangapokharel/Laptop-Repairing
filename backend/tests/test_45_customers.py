@@ -27,7 +27,7 @@ if BASE_URL.endswith('/v1'):
 class CustomerIssueTest:
     def __init__(self):
         self.base_url = BASE_URL
-        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
+        self.api_url = f"{API_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.customers = []
         self.devices = []
@@ -146,7 +146,7 @@ class CustomerIssueTest:
             headers = {"Authorization": f"Bearer {self.access_token}"}
             
             # Get roles
-            roles_resp = await client.get(f"{self.base_url}/v1/users/roles", headers=headers)
+            roles_resp = await client.get(f"{self.api_url}/users/roles", headers=headers)
             if roles_resp.status_code == 200:
                 roles = roles_resp.json()
                 for role in roles:
@@ -212,7 +212,7 @@ class CustomerIssueTest:
             
             # Register customer
             try:
-                register_resp = await client.post(f"{self.base_url}/v1/auth/register", json=customer_data)
+                register_resp = await client.post(f"{self.api_url}/auth/register", json=customer_data)
                 if register_resp.status_code not in [201, 400]:
                     return False
             except:
@@ -565,7 +565,7 @@ class CustomerIssueTest:
         # Check if server is running
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(f"{BASE_URL}/health", timeout=10.0)
+                response = await client.get(f"{API_URL}/health", timeout=10.0)
                 if response.status_code != 200:
                     print(f"[ERROR] Backend server is not running on {self.base_url}")
                     print(f"Health check returned status: {response.status_code}")

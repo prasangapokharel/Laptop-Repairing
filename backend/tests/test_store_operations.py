@@ -21,7 +21,7 @@ if BASE_URL.endswith('/v1'):
 class StoreOperationsTest:
     def __init__(self):
         self.base_url = BASE_URL
-        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
+        self.api_url = f"{API_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.refresh_token = None
         self.customer_id = None
@@ -52,13 +52,13 @@ class StoreOperationsTest:
                 "email": f"customer{unique_id}@store.com",
                 "password": "storepass123"
             }
-            response = await client.post(f"{self.base_url}/v1/auth/register", json=register_data)
+            response = await client.post(f"{self.api_url}/auth/register", json=register_data)
             if response.status_code == 201:
                 self.customer_id = response.json().get("id")
                 print(f"[OK] Customer registered: ID {self.customer_id}")
             
             login_data = {"phone": register_data["phone"], "password": register_data["password"]}
-            response = await client.post(f"{self.base_url}/v1/auth/login", json=login_data)
+            response = await client.post(f"{self.api_url}/auth/login", json=login_data)
             if response.status_code == 200:
                 data = response.json()
                 self.access_token = data["tokens"]["access_token"]
@@ -69,16 +69,16 @@ class StoreOperationsTest:
             
             headers = {"Authorization": f"Bearer {self.access_token}"}
             
-            types_resp = await client.get(f"{self.base_url}/v1/devices/types", headers=headers)
+            types_resp = await client.get(f"{self.api_url}/devices/types", headers=headers)
             if types_resp.status_code == 200 and len(types_resp.json()) > 0:
                 self.device_type_id = types_resp.json()[0]["id"]
             
-            brands_resp = await client.get(f"{self.base_url}/v1/devices/brands", headers=headers)
+            brands_resp = await client.get(f"{self.api_url}/devices/brands", headers=headers)
             if brands_resp.status_code == 200 and len(brands_resp.json()) > 0:
                 self.brand_id = brands_resp.json()[0]["id"]
             
             if self.brand_id and self.device_type_id:
-                models_resp = await client.get(f"{self.base_url}/v1/devices/models", headers=headers)
+                models_resp = await client.get(f"{self.api_url}/devices/models", headers=headers)
                 if models_resp.status_code == 200 and len(models_resp.json()) > 0:
                     self.model_id = models_resp.json()[0]["id"]
             
@@ -91,7 +91,7 @@ class StoreOperationsTest:
                     "owner_id": self.customer_id,
                     "notes": "Customer device for repair"
                 }
-                response = await client.post(f"{self.base_url}/v1/devices", json=device_data, headers=headers)
+                response = await client.post(f"{self.api_url}/devices", json=device_data, headers=headers)
                 if response.status_code == 201:
                     device = response.json()
                     self.device_ids.append(device["id"])
@@ -117,7 +117,7 @@ class StoreOperationsTest:
                 "note": "Initial diagnosis: Screen replacement needed",
                 "status": "Pending"
             }
-            response = await client.post(f"{self.base_url}/v1/orders", json=order_data, headers=headers)
+            response = await client.post(f"{self.api_url}/orders", json=order_data, headers=headers)
             print(f"[OK] Order Created: {response.status_code}")
             if response.status_code == 201:
                 order = response.json()
@@ -143,7 +143,7 @@ class StoreOperationsTest:
                 "order_id": int(self.order_ids[0]),
                 "user_id": int(self.customer_id)
             }
-            response = await client.post(f"{self.base_url}/v1/assigns", json=assign_data, headers=headers)
+            response = await client.post(f"{self.api_url}/assigns", json=assign_data, headers=headers)
             print(f"[OK] Technician Assigned: {response.status_code}")
             if response.status_code == 201:
                 assign = response.json()
@@ -169,7 +169,7 @@ class StoreOperationsTest:
                 "status": "Repairing",
                 "note": "Diagnosis complete: Screen + battery replacement needed. Customer approved."
             }
-            response = await client.patch(f"{self.base_url}/v1/orders/{self.order_ids[0]}", json=update_data, headers=headers)
+            response = await client.patch(f"{self.api_url}/orders/{self.order_ids[0]}", json=update_data, headers=headers)
             print(f"[OK] Order Updated: {response.status_code}")
             if response.status_code == 200:
                 order = response.json()
@@ -198,7 +198,7 @@ class StoreOperationsTest:
                 "payment_method": None,
                 "transaction_id": None
             }
-            response = await client.post(f"{self.base_url}/v1/payments", json=payment_data, headers=headers)
+            response = await client.post(f"{self.api_url}/payments", json=payment_data, headers=headers)
             print(f"[OK] Payment Created (Due): {response.status_code}")
             if response.status_code == 201:
                 payment = response.json()
@@ -228,7 +228,7 @@ class StoreOperationsTest:
                 "payment_method": "Cash",
                 "transaction_id": f"TXN{int(datetime.now().timestamp())}"
             }
-            response = await client.post(f"{self.base_url}/v1/payments", json=payment_data, headers=headers)
+            response = await client.post(f"{self.api_url}/payments", json=payment_data, headers=headers)
             print(f"[OK] Partial Payment: {response.status_code}")
             if response.status_code == 201:
                 payment = response.json()
@@ -238,7 +238,7 @@ class StoreOperationsTest:
                 print(f"  Remaining Due: ${float(payment['due_amount']) - float(payment['amount'])}")
                 print(f"  Status: {payment['status']}")
                 
-                response = await client.get(f"{self.base_url}/v1/payments", headers=headers, params={"order_id": self.order_ids[0]})
+                response = await client.get(f"{self.api_url}/payments", headers=headers, params={"order_id": self.order_ids[0]})
                 if response.status_code == 200:
                     payments = response.json()
                     total_paid = sum(float(p["amount"]) for p in payments)
@@ -264,7 +264,7 @@ class StoreOperationsTest:
                 "payment_method": "Card",
                 "transaction_id": f"TXN{int(datetime.now().timestamp())}"
             }
-            response = await client.post(f"{self.base_url}/v1/payments", json=payment_data, headers=headers)
+            response = await client.post(f"{self.api_url}/payments", json=payment_data, headers=headers)
             print(f"[OK] Final Payment: {response.status_code}")
             if response.status_code == 201:
                 payment = response.json()
@@ -273,7 +273,7 @@ class StoreOperationsTest:
                 print(f"  Amount Paid: ${payment['amount']}")
                 print(f"  Status: {payment['status']}")
                 
-                response = await client.get(f"{self.base_url}/v1/payments", headers=headers, params={"order_id": self.order_ids[0]})
+                response = await client.get(f"{self.api_url}/payments", headers=headers, params={"order_id": self.order_ids[0]})
                 if response.status_code == 200:
                     payments = response.json()
                     total_paid = sum(float(p["amount"]) for p in payments)
@@ -298,7 +298,7 @@ class StoreOperationsTest:
                 "status": "Completed",
                 "note": "Repair completed successfully. Device tested and working perfectly."
             }
-            response = await client.patch(f"{self.base_url}/v1/orders/{self.order_ids[0]}", json=update_data, headers=headers)
+            response = await client.patch(f"{self.api_url}/orders/{self.order_ids[0]}", json=update_data, headers=headers)
             print(f"[OK] Order Completed: {response.status_code}")
             if response.status_code == 200:
                 order = response.json()
@@ -315,7 +315,7 @@ class StoreOperationsTest:
         async with httpx.AsyncClient() as client:
             statuses = ["Paid", "Due", "Unpaid", "Partial"]
             for status in statuses:
-                response = await client.get(f"{self.base_url}/v1/payments", headers=headers, params={"status": status})
+                response = await client.get(f"{self.api_url}/payments", headers=headers, params={"status": status})
                 if response.status_code == 200:
                     payments = response.json()
                     total = sum(float(p["amount"]) for p in payments)
@@ -329,7 +329,7 @@ class StoreOperationsTest:
         async with httpx.AsyncClient() as client:
             statuses = ["Pending", "Repairing", "Completed", "Cancelled"]
             for status in statuses:
-                response = await client.get(f"{self.base_url}/v1/orders", headers=headers, params={"status": status})
+                response = await client.get(f"{self.api_url}/orders", headers=headers, params={"status": status})
                 if response.status_code == 200:
                     orders = response.json()
                     print(f"[OK] {status} Orders: {len(orders)}")
@@ -355,7 +355,7 @@ class StoreOperationsTest:
                 "owner_id": self.customer_id,
                 "notes": "Second device from same customer"
             }
-            response = await client.post(f"{self.base_url}/v1/devices", json=device2, headers=headers)
+            response = await client.post(f"{self.api_url}/devices", json=device2, headers=headers)
             if response.status_code == 201:
                 device = response.json()
                 self.device_ids.append(device["id"])
@@ -369,13 +369,13 @@ class StoreOperationsTest:
                     "discount": "10.00",
                     "status": "Pending"
                 }
-                response = await client.post(f"{self.base_url}/v1/orders", json=order2, headers=headers)
+                response = await client.post(f"{self.api_url}/orders", json=order2, headers=headers)
                 if response.status_code == 201:
                     order = response.json()
                     self.order_ids.append(order["id"])
                     print(f"[OK] Order 2 Created: ID {order['id']}, Total: ${order['total_cost']}")
             
-            response = await client.get(f"{self.base_url}/v1/orders", headers=headers, params={"customer_id": self.customer_id})
+            response = await client.get(f"{self.api_url}/orders", headers=headers, params={"customer_id": self.customer_id})
             if response.status_code == 200:
                 orders = response.json()
                 print(f"[OK] Customer has {len(orders)} orders")
@@ -421,7 +421,7 @@ class StoreOperationsTest:
             ]
             
             for scenario in scenarios:
-                response = await client.post(f"{self.base_url}/v1/payments", json=scenario["data"], headers=headers)
+                response = await client.post(f"{self.api_url}/payments", json=scenario["data"], headers=headers)
                 print(f"[OK] {scenario['name']}: {response.status_code}")
                 if response.status_code == 201:
                     payment = response.json()

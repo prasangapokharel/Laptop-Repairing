@@ -25,7 +25,7 @@ if BASE_URL.endswith('/v1'):
 class ComprehensiveTableTest:
     def __init__(self):
         self.base_url = BASE_URL
-        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
+        self.api_url = f"{API_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.refresh_token = None
         self.user_id = None
@@ -55,7 +55,7 @@ class ComprehensiveTableTest:
             headers = {"Authorization": f"Bearer {self.access_token}"} if self.access_token else {}
             
             # List roles
-            response = await client.get(f"{self.base_url}/v1/users/roles", headers=headers)
+            response = await client.get(f"{self.api_url}/users/roles", headers=headers)
             if response.status_code == 200:
                 roles = response.json()
                 print(f"[OK] List Roles: {len(roles)} roles found")
@@ -78,7 +78,7 @@ class ComprehensiveTableTest:
             headers = {"Authorization": f"Bearer {self.access_token}"} if self.access_token else {}
             
             # List device types
-            response = await client.get(f"{self.base_url}/v1/devices/types", headers=headers)
+            response = await client.get(f"{self.api_url}/devices/types", headers=headers)
             if response.status_code == 200:
                 device_types = response.json()
                 print(f"[OK] List Device Types: {len(device_types)} types found")
@@ -101,7 +101,7 @@ class ComprehensiveTableTest:
             headers = {"Authorization": f"Bearer {self.access_token}"} if self.access_token else {}
             
             # List brands
-            response = await client.get(f"{self.base_url}/v1/devices/brands", headers=headers)
+            response = await client.get(f"{self.api_url}/devices/brands", headers=headers)
             if response.status_code == 200:
                 brands = response.json()
                 print(f"[OK] List Brands: {len(brands)} brands found")
@@ -124,7 +124,7 @@ class ComprehensiveTableTest:
             headers = {"Authorization": f"Bearer {self.access_token}"} if self.access_token else {}
             
             # List models
-            response = await client.get(f"{self.base_url}/v1/devices/models", headers=headers)
+            response = await client.get(f"{self.api_url}/devices/models", headers=headers)
             if response.status_code == 200:
                 models = response.json()
                 print(f"[OK] List Models: {len(models)} models found")
@@ -195,7 +195,7 @@ class ComprehensiveTableTest:
                     
                     # List users
                     headers = {"Authorization": f"Bearer {self.access_token}"}
-                    list_resp = await client.get(f"{self.base_url}/v1/users", headers=headers)
+                    list_resp = await client.get(f"{self.api_url}/users", headers=headers)
                     if list_resp.status_code == 200:
                         users = list_resp.json()
                         print(f"[OK] List Users: {len(users)} users found")
@@ -232,7 +232,7 @@ class ComprehensiveTableTest:
             headers = {"Authorization": f"Bearer {self.access_token}"}
             
             # Get roles first
-            roles_resp = await client.get(f"{self.base_url}/v1/users/roles", headers=headers)
+            roles_resp = await client.get(f"{self.api_url}/users/roles", headers=headers)
             if roles_resp.status_code == 200:
                 roles = roles_resp.json()
                 if roles:
@@ -242,7 +242,7 @@ class ComprehensiveTableTest:
                             "user_id": self.user_id,
                             "role_id": customer_role["id"]
                         }
-                        enroll_resp = await client.post(f"{self.base_url}/v1/users/roles/enroll", json=enroll_data, headers=headers)
+                        enroll_resp = await client.post(f"{self.api_url}/users/roles/enroll", json=enroll_data, headers=headers)
                         if enroll_resp.status_code in [200, 201, 400]:  # 400 if already enrolled
                             print(f"[OK] Role Enrollment: Customer role assigned")
                             self.passed += 1
@@ -279,14 +279,14 @@ class ComprehensiveTableTest:
                 "notes": "Test device for comprehensive testing"
             }
             
-            response = await client.post(f"{self.base_url}/v1/devices", json=device_data, headers=headers)
+            response = await client.post(f"{self.api_url}/devices", json=device_data, headers=headers)
             if response.status_code == 201:
                 device = response.json()
                 self.device_ids.append(device["id"])
                 print(f"[OK] Create Device: ID {device['id']}, Serial: {device['serial_number']}")
                 
                 # List devices
-                list_resp = await client.get(f"{self.base_url}/v1/devices", headers=headers)
+                list_resp = await client.get(f"{self.api_url}/devices", headers=headers)
                 if list_resp.status_code == 200:
                     devices = list_resp.json()
                     print(f"[OK] List Devices: {len(devices)} devices found")
@@ -320,14 +320,14 @@ class ComprehensiveTableTest:
                 "status": "Pending"
             }
             
-            response = await client.post(f"{self.base_url}/v1/orders", json=order_data, headers=headers)
+            response = await client.post(f"{self.api_url}/orders", json=order_data, headers=headers)
             if response.status_code == 201:
                 order = response.json()
                 self.order_ids.append(order["id"])
                 print(f"[OK] Create Order: ID {order['id']}, Status: {order['status']}, Total: ${order['total_cost']}")
                 
                 # List orders
-                list_resp = await client.get(f"{self.base_url}/v1/orders", headers=headers)
+                list_resp = await client.get(f"{self.api_url}/orders", headers=headers)
                 if list_resp.status_code == 200:
                     orders = list_resp.json()
                     print(f"[OK] List Orders: {len(orders)} orders found")
@@ -354,14 +354,14 @@ class ComprehensiveTableTest:
                 "user_id": self.user_id
             }
             
-            response = await client.post(f"{self.base_url}/v1/assigns", json=assign_data, headers=headers)
+            response = await client.post(f"{self.api_url}/assigns", json=assign_data, headers=headers)
             if response.status_code == 201:
                 assign = response.json()
                 self.assign_ids.append(assign["id"])
                 print(f"[OK] Assign Order: Assignment ID {assign['id']}, User ID {assign['user_id']}")
                 
                 # List assigns
-                list_resp = await client.get(f"{self.base_url}/v1/assigns", headers=headers)
+                list_resp = await client.get(f"{self.api_url}/assigns", headers=headers)
                 if list_resp.status_code == 200:
                     assigns = list_resp.json()
                     print(f"[OK] List Assigns: {len(assigns)} assignments found")
@@ -394,7 +394,7 @@ class ComprehensiveTableTest:
                 "note": "Status updated to test history tracking"
             }
             
-            response = await client.patch(f"{self.base_url}/v1/orders/{self.order_ids[0]}", json=update_data, headers=headers)
+            response = await client.patch(f"{self.api_url}/orders/{self.order_ids[0]}", json=update_data, headers=headers)
             if response.status_code == 200:
                 order = response.json()
                 print(f"[OK] Update Order Status: Status changed to {order['status']}")
@@ -425,14 +425,14 @@ class ComprehensiveTableTest:
                 "payment_method": "Cash"
             }
             
-            response = await client.post(f"{self.base_url}/v1/payments", json=payment_data, headers=headers)
+            response = await client.post(f"{self.api_url}/payments", json=payment_data, headers=headers)
             if response.status_code == 201:
                 payment = response.json()
                 self.payment_ids.append(payment["id"])
                 print(f"[OK] Create Payment: ID {payment['id']}, Status: {payment['status']}, Amount: ${payment['amount']}")
                 
                 # List payments
-                list_resp = await client.get(f"{self.base_url}/v1/payments", headers=headers)
+                list_resp = await client.get(f"{self.api_url}/payments", headers=headers)
                 if list_resp.status_code == 200:
                     payments = list_resp.json()
                     print(f"[OK] List Payments: {len(payments)} payments found")
@@ -456,7 +456,7 @@ class ComprehensiveTableTest:
                 "refresh_token": self.refresh_token
             }
             
-            response = await client.post(f"{self.base_url}/v1/auth/refresh", json=refresh_data)
+            response = await client.post(f"{self.api_url}/auth/refresh", json=refresh_data)
             if response.status_code == 200:
                 tokens = response.json()
                 self.access_token = tokens["access_token"]
@@ -496,7 +496,7 @@ class ComprehensiveTableTest:
                     "owner_id": self.user_id
                 }
                 
-                device_resp = await client.post(f"{self.base_url}/v1/devices", json=device_data, headers=headers)
+                device_resp = await client.post(f"{self.api_url}/devices", json=device_data, headers=headers)
                 if device_resp.status_code == 201:
                     device = device_resp.json()
                     
@@ -508,7 +508,7 @@ class ComprehensiveTableTest:
                         "status": "Pending"
                     }
                     
-                    order_resp = await client.post(f"{self.base_url}/v1/orders", json=order_data, headers=headers)
+                    order_resp = await client.post(f"{self.api_url}/orders", json=order_data, headers=headers)
                     if order_resp.status_code == 201:
                         order = order_resp.json()
                         
@@ -518,12 +518,12 @@ class ComprehensiveTableTest:
                             "user_id": self.user_id
                         }
                         
-                        assign_resp = await client.post(f"{self.base_url}/v1/assigns", json=assign_data, headers=headers)
+                        assign_resp = await client.post(f"{self.api_url}/assigns", json=assign_data, headers=headers)
                         if assign_resp.status_code in [201, 400]:
                             
                             # Update order status
                             update_data = {"status": "Repairing", "cost": "400.00"}
-                            update_resp = await client.patch(f"{self.base_url}/v1/orders/{order['id']}", json=update_data, headers=headers)
+                            update_resp = await client.patch(f"{self.api_url}/orders/{order['id']}", json=update_data, headers=headers)
                             if update_resp.status_code == 200:
                                 
                                 # Create payment
@@ -534,12 +534,12 @@ class ComprehensiveTableTest:
                                     "status": "Partial"
                                 }
                                 
-                                payment_resp = await client.post(f"{self.base_url}/v1/payments", json=payment_data, headers=headers)
+                                payment_resp = await client.post(f"{self.api_url}/payments", json=payment_data, headers=headers)
                                 if payment_resp.status_code == 201:
                                     
                                     # Complete order
                                     complete_data = {"status": "Completed", "note": "Repair completed successfully"}
-                                    complete_resp = await client.patch(f"{self.base_url}/v1/orders/{order['id']}", json=complete_data, headers=headers)
+                                    complete_resp = await client.patch(f"{self.api_url}/orders/{order['id']}", json=complete_data, headers=headers)
                                     if complete_resp.status_code == 200:
                                         print(f"[OK] Complete Workflow: All tables integrated successfully")
                                         print(f"  - Device created")
@@ -607,7 +607,7 @@ async def main():
     # Check if server is running
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(f"{BASE_URL}/health", timeout=10.0)
+            response = await client.get(f"{API_URL}/health", timeout=10.0)
             if response.status_code != 200:
                 print(f"[ERROR] Backend server is not running on {BASE_URL}")
                 print(f"Health check returned status: {response.status_code}")
