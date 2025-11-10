@@ -13,11 +13,16 @@ load_dotenv(env_path)
 
 # Get BASE_URL from environment or use default
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+# Remove trailing slash and /v1 if present
+BASE_URL = BASE_URL.rstrip('/')
+if BASE_URL.endswith('/v1'):
+    BASE_URL = BASE_URL[:-3]
 
 
 class TestRepairOffice:
     def __init__(self):
         self.base_url = BASE_URL
+        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.refresh_token = None
         self.user_id = None

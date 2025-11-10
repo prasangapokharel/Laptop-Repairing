@@ -18,11 +18,16 @@ load_dotenv(env_path)
 
 # Get BASE_URL from environment or use default
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+# Remove trailing slash and /v1 if present
+BASE_URL = BASE_URL.rstrip('/')
+if BASE_URL.endswith('/v1'):
+    BASE_URL = BASE_URL[:-3]
 
 
 class CustomerIssueTest:
     def __init__(self):
         self.base_url = BASE_URL
+        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.customers = []
         self.devices = []
@@ -104,10 +109,10 @@ class CustomerIssueTest:
             }
             
             try:
-                response = await client.post(f"{self.base_url}/v1/auth/register", json=admin_data)
+                response = await client.post(f"{self.api_url}/auth/register", json=admin_data)
                 if response.status_code != 201:
                     # Try login
-                    login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                         "phone": admin_data["phone"],
                         "password": admin_data["password"]
                     })
@@ -115,7 +120,7 @@ class CustomerIssueTest:
                         tokens = login_resp.json()
                         self.access_token = tokens["access_token"]
                 else:
-                    login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                         "phone": admin_data["phone"],
                         "password": admin_data["password"]
                     })
@@ -127,7 +132,7 @@ class CustomerIssueTest:
             
             if not self.access_token:
                 # Use existing seeded user
-                login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                     "phone": "1234567890",
                     "password": "admin123"
                 })
@@ -148,21 +153,21 @@ class CustomerIssueTest:
                     self.role_ids[role["name"]] = role["id"]
             
             # Get device types
-            types_resp = await client.get(f"{self.base_url}/v1/devices/types", headers=headers)
+            types_resp = await client.get(f"{self.api_url}/devices/types", headers=headers)
             if types_resp.status_code == 200:
                 device_types = types_resp.json()
                 for dt in device_types:
                     self.device_type_ids[dt["name"]] = dt["id"]
             
             # Get brands
-            brands_resp = await client.get(f"{self.base_url}/v1/devices/brands", headers=headers)
+            brands_resp = await client.get(f"{self.api_url}/devices/brands", headers=headers)
             if brands_resp.status_code == 200:
                 brands = brands_resp.json()
                 for brand in brands:
                     self.brand_ids[brand["name"]] = brand["id"]
             
             # Get models
-            models_resp = await client.get(f"{self.base_url}/v1/devices/models", headers=headers)
+            models_resp = await client.get(f"{self.api_url}/devices/models", headers=headers)
             if models_resp.status_code == 200:
                 models = models_resp.json()
                 for model in models:
@@ -178,8 +183,8 @@ class CustomerIssueTest:
                     "password": "tech123"
                 }
                 try:
-                    await client.post(f"{self.base_url}/v1/auth/register", json=tech_data)
-                    login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    await client.post(f"{self.api_url}/auth/register", json=tech_data)
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                         "phone": tech_data["phone"],
                         "password": tech_data["password"]
                     })
@@ -214,7 +219,7 @@ class CustomerIssueTest:
                 pass
             
             # Login
-            login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": customer_data["phone"],
                 "password": customer_data["password"]
             })
@@ -229,7 +234,7 @@ class CustomerIssueTest:
             if not customer_id:
                 # Get user ID from token or register response
                 try:
-                    user_resp = await client.get(f"{self.base_url}/v1/users", headers={
+                    user_resp = await client.get(f"{self.api_url}/users", headers={
                         "Authorization": f"Bearer {customer_token}"
                     }, params={"phone": customer_data["phone"]})
                     if user_resp.status_code == 200:
@@ -278,7 +283,7 @@ class CustomerIssueTest:
                 "notes": f"Device issue for customer {customer_num}"
             }
             
-            device_resp = await client.post(f"{self.base_url}/v1/devices", json=device_data, headers=headers)
+            device_resp = await client.post(f"{self.api_url}/devices", json=device_data, headers=headers)
             if device_resp.status_code not in [201, 400]:
                 return False
             
@@ -287,7 +292,7 @@ class CustomerIssueTest:
                 device_id = device["id"]
             else:
                 # Device exists, get it
-                devices_resp = await client.get(f"{self.base_url}/v1/devices", headers=headers, params={
+                devices_resp = await client.get(f"{self.api_url}/devices", headers=headers, params={
                     "serial_number": device_data["serial_number"]
                 })
                 if devices_resp.status_code == 200:
@@ -312,7 +317,7 @@ class CustomerIssueTest:
                 "note": f"Customer {customer_num}: {issue['problem']} - {issue['urgency']} priority"
             }
             
-            order_resp = await client.post(f"{self.base_url}/v1/orders", json=order_data, headers=headers)
+            order_resp = await client.post(f"{self.api_url}/orders", json=order_data, headers=headers)
             if order_resp.status_code != 201:
                 return False
             
@@ -326,7 +331,7 @@ class CustomerIssueTest:
                     "order_id": order_id,
                     "user_id": tech_id
                 }
-                assign_resp = await client.post(f"{self.base_url}/v1/assigns", json=assign_data, headers=headers)
+                assign_resp = await client.post(f"{self.api_url}/assigns", json=assign_data, headers=headers)
                 # Don't fail if assignment fails (might already be assigned)
             
             # Create payment (various scenarios)
@@ -341,7 +346,7 @@ class CustomerIssueTest:
                 "payment_method": random.choice(["Cash", "Card", "Online"])
             }
             
-            payment_resp = await client.post(f"{self.base_url}/v1/payments", json=payment_data, headers=headers)
+            payment_resp = await client.post(f"{self.api_url}/payments", json=payment_data, headers=headers)
             # Don't fail if payment creation fails
             
             # Store customer data
@@ -409,7 +414,7 @@ class CustomerIssueTest:
         
         async with httpx.AsyncClient() as client:
             # Get admin token
-            login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": "1234567890",
                 "password": "admin123"
             })
@@ -430,7 +435,7 @@ class CustomerIssueTest:
                 
                 try:
                     update_resp = await client.patch(
-                        f"{self.base_url}/v1/orders/{customer['order_id']}",
+                        f"{self.api_url}/orders/{customer['order_id']}",
                         json=update_data,
                         headers=headers
                     )
@@ -453,7 +458,7 @@ class CustomerIssueTest:
             return False
         
         async with httpx.AsyncClient() as client:
-            login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": "1234567890",
                 "password": "admin123"
             })
@@ -477,8 +482,8 @@ class CustomerIssueTest:
                     }
                     
                     try:
-                        payment_resp = await client.post(
-                            f"{self.base_url}/v1/payments",
+                    payment_resp = await client.post(
+                        f"{self.api_url}/payments",
                             json=payment_data,
                             headers=headers
                         )
@@ -497,7 +502,7 @@ class CustomerIssueTest:
         print("="*70)
         
         async with httpx.AsyncClient() as client:
-            login_resp = await client.post(f"{self.base_url}/v1/auth/login", json={
+                    login_resp = await client.post(f"{self.api_url}/auth/login", json={
                 "phone": "1234567890",
                 "password": "admin123"
             })
@@ -513,7 +518,7 @@ class CustomerIssueTest:
             for status in ["Pending", "Repairing", "Completed", "Cancelled"]:
                 try:
                     orders_resp = await client.get(
-                        f"{self.base_url}/v1/orders",
+                        f"{self.api_url}/orders",
                         headers=headers,
                         params={"status": status, "limit": 50}
                     )
@@ -526,7 +531,7 @@ class CustomerIssueTest:
             for status in ["Paid", "Due", "Partial", "Unpaid"]:
                 try:
                     payments_resp = await client.get(
-                        f"{self.base_url}/v1/payments",
+                        f"{self.api_url}/payments",
                         headers=headers,
                         params={"status": status, "limit": 50}
                     )
@@ -538,7 +543,7 @@ class CustomerIssueTest:
             # Query devices
             try:
                 devices_resp = await client.get(
-                    f"{self.base_url}/v1/devices",
+                    f"{self.api_url}/devices",
                     headers=headers,
                     params={"limit": 50}
                 )
@@ -560,7 +565,7 @@ class CustomerIssueTest:
         # Check if server is running
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(f"{self.base_url}/health", timeout=10.0)
+                response = await client.get(f"{BASE_URL}/health", timeout=10.0)
                 if response.status_code != 200:
                     print(f"[ERROR] Backend server is not running on {self.base_url}")
                     print(f"Health check returned status: {response.status_code}")

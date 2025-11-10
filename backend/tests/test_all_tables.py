@@ -16,11 +16,16 @@ load_dotenv(env_path)
 
 # Get BASE_URL from environment or use default
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+# Remove trailing slash and /v1 if present
+BASE_URL = BASE_URL.rstrip('/')
+if BASE_URL.endswith('/v1'):
+    BASE_URL = BASE_URL[:-3]
 
 
 class ComprehensiveTableTest:
     def __init__(self):
         self.base_url = BASE_URL
+        self.api_url = f"{BASE_URL}/v1"  # API URL with /v1 prefix
         self.access_token = None
         self.refresh_token = None
         self.user_id = None
@@ -170,7 +175,7 @@ class ComprehensiveTableTest:
                 "password": "test123456"
             }
             
-            response = await client.post(f"{self.base_url}/v1/auth/register", json=register_data)
+            response = await client.post(f"{self.api_url}/auth/register", json=register_data)
             if response.status_code == 201:
                 user = response.json()
                 self.user_id = user["id"]
@@ -181,7 +186,7 @@ class ComprehensiveTableTest:
                     "phone": register_data["phone"],
                     "password": register_data["password"]
                 }
-                login_resp = await client.post(f"{self.base_url}/v1/auth/login", json=login_data)
+                login_resp = await client.post(f"{self.api_url}/auth/login", json=login_data)
                 if login_resp.status_code == 200:
                     tokens = login_resp.json()
                     self.access_token = tokens["access_token"]
@@ -202,7 +207,7 @@ class ComprehensiveTableTest:
                     "phone": register_data["phone"],
                     "password": register_data["password"]
                 }
-                login_resp = await client.post(f"{self.base_url}/v1/auth/login", json=login_data)
+                login_resp = await client.post(f"{self.api_url}/auth/login", json=login_data)
                 if login_resp.status_code == 200:
                     tokens = login_resp.json()
                     self.access_token = tokens["access_token"]

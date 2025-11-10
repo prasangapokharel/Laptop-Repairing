@@ -11,6 +11,11 @@ load_dotenv(env_path)
 
 # Get BASE_URL from environment or use default
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+# Remove trailing slash and /v1 if present
+BASE_URL = BASE_URL.rstrip('/')
+if BASE_URL.endswith('/v1'):
+    BASE_URL = BASE_URL[:-3]
+API_URL = f"{BASE_URL}/v1"  # API URL with /v1 prefix
 
 
 async def test_auth():
@@ -22,11 +27,11 @@ async def test_auth():
             "email": "test@example.com",
             "password": "testpass123"
         }
-        response = await client.post(f"{BASE_URL}/auth/register", json=register_data)
+        response = await client.post(f"{API_URL}/auth/register", json=register_data)
         print(f"Register: {response.status_code} - {response.json()}")
         
         login_data = {"phone": "1234567890", "password": "testpass123"}
-        response = await client.post(f"{BASE_URL}/auth/login", json=login_data)
+        response = await client.post(f"{API_URL}/auth/login", json=login_data)
         print(f"Login: {response.status_code}")
         if response.status_code == 200:
             data = response.json()
