@@ -1,0 +1,96 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from datetime import datetime, timedelta
+from db import get_db
+from models.user import User, RefreshToken
+from schemas.auth import RegisterRequest, LoginRequest, LoginResponse, RefreshRequest, RefreshResponse, TokenResponse
+from utils.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token
+from core.config import settings
+from schemas.user import UserResponse
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post("/register", response_model=UserResponse, status_code=201)
+async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    existing = await db.execute(select(User).where(User.phone == data.phone))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="Phone already registered")
+    
+    user = User(
+        full_name=data.full_name,
+        phone=data.phone,
+        email=data.email,
+        password_hash=hash_password(data.password)
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+@router.post("/login", response_model=LoginResponse)
+async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.phone == data.phone))
+    user = result.scalar_one_or_none()
+    
+    if not user or not verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User is inactive")
+    
+    access_token = create_access_token({"sub": str(user.id), "phone": user.phone})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
+    
+    expires_at = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    token_record = RefreshToken(
+        user_id=user.id,
+        token=refresh_token,
+        expires_at=expires_at
+    )
+    db.add(token_record)
+    await db.commit()
+    
+    return LoginResponse(
+        user=UserResponse.model_validate(user).model_dump(),
+        tokens=TokenResponse(access_token=access_token, refresh_token=refresh_token)
+    )
+
+
+@router.post("/refresh", response_model=RefreshResponse)
+async def refresh(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    payload = decode_token(data.refresh_token)
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    user_id = int(payload.get("sub"))
+    token_record = await db.execute(
+        select(RefreshToken).where(
+            RefreshToken.token == data.refresh_token,
+            RefreshToken.user_id == user_id,
+            RefreshToken.expires_at > datetime.utcnow()
+        )
+    )
+    token = token_record.scalar_one_or_none()
+    if not token:
+        raise HTTPException(status_code=401, detail="Refresh token not found or expired")
+    
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=403, detail="User not found or inactive")
+    
+    access_token = create_access_token({"sub": str(user.id), "phone": user.phone})
+    return RefreshResponse(access_token=access_token)
+
+
+@router.post("/logout", status_code=204)
+async def logout(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RefreshToken).where(RefreshToken.token == data.refresh_token))
+    token = result.scalar_one_or_none()
+    if token:
+        await db.delete(token)
+        await db.commit()
+
