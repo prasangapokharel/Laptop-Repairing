@@ -42,17 +42,24 @@ python -m pip install --upgrade setuptools wheel --quiet
 
 REM Install dependencies (orjson may require Rust, but has pre-built wheels for Windows)
 echo Installing dependencies...
-python -m pip install -r requirements.txt --quiet
+python -m pip install -r requirements.txt --quiet --only-binary :all:
 if errorlevel 1 (
-    echo WARNING: Some dependencies failed to install, trying without cache...
-    python -m pip install -r requirements.txt --no-cache-dir
+    echo WARNING: Failed with binary-only, trying with source builds...
+    python -m pip install -r requirements.txt --quiet
     if errorlevel 1 (
-        echo ERROR: Failed to install dependencies
-        echo.
-        echo TIP: If you see Rust/Cargo errors, try installing Rust from https://rustup.rs/
-        echo Or install dependencies manually: pip install -r requirements.txt
-        pause
-        exit /b 1
+        echo WARNING: Some packages failed, trying orjson separately...
+        python -m pip install fastapi uvicorn sqlalchemy aiomysql pymysql alembic passlib python-jose python-dotenv pydantic pydantic-settings httpx --quiet
+        python -m pip install orjson --quiet || echo WARNING: orjson failed, will use standard json
+        if errorlevel 1 (
+            echo ERROR: Critical dependencies failed to install
+            echo.
+            echo TIP: If you see Rust/Cargo errors for orjson:
+            echo 1. Install Rust from https://rustup.rs/
+            echo 2. Or use standard JSON (orjson is optional for performance)
+            echo 3. Or install manually: pip install -r requirements.txt
+            pause
+            exit /b 1
+        )
     )
 )
 echo OK: Dependencies installed
