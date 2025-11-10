@@ -5,10 +5,11 @@ All test files are organized in this directory for better project structure.
 ## Test Files
 
 1. **test_all_tables.py** - Comprehensive test suite that tests ALL 14 database tables
-2. **test_api.py** - Basic API endpoint tests
-3. **test_comprehensive.py** - Comprehensive repair office scenarios (16 scenarios)
-4. **test_store_operations.py** - Store operations focused tests (12 scenarios)
-5. **test_v1_api.py** - API v1 specific tests
+2. **test_45_customers.py** - **NEW!** Real-world test with 45+ customers having different device issues
+3. **test_api.py** - Basic API endpoint tests
+4. **test_comprehensive.py** - Comprehensive repair office scenarios (16 scenarios)
+5. **test_store_operations.py** - Store operations focused tests (12 scenarios)
+6. **test_v1_api.py** - API v1 specific tests
 
 ## Running Tests
 
@@ -26,7 +27,26 @@ All test files are organized in this directory for better project structure.
    python migration/run_seed.py
    ```
 
-### Run All Table Tests (Recommended)
+### Run 45+ Customer Test (Real-World Scenario) ⭐ RECOMMENDED
+
+Tests system flexibility with 45+ customers having different device issues:
+
+```bash
+cd backend
+python tests/test_45_customers.py
+```
+
+This test simulates a real-world scenario where:
+- 45+ customers come with different device issues
+- Various device types (Laptop, Desktop, Tablet, Smartphone)
+- Different brands and models
+- 15+ different problem types
+- Multiple payment scenarios (Full, Partial, Due, Installments)
+- Different order statuses (Pending, Repairing, Completed, Cancelled)
+- Multiple technicians handling orders
+- Bulk operations and query testing
+
+### Run All Table Tests
 
 Tests all 14 database tables with 100% coverage:
 
@@ -68,10 +88,11 @@ Run all test suites:
 
 ```bash
 cd backend
-python tests/test_all_tables.py
-python tests/test_comprehensive.py
-python tests/test_store_operations.py
-python tests/test_api.py
+python tests/test_45_customers.py      # Real-world 45+ customer scenario
+python tests/test_all_tables.py        # All 14 tables
+python tests/test_comprehensive.py    # 16 repair office scenarios
+python tests/test_store_operations.py # 12 store operation scenarios
+python tests/test_api.py               # Basic API tests
 ```
 
 ## Test Coverage
