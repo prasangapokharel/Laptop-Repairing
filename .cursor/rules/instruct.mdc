@@ -1,0 +1,75 @@
+---
+alwaysApply: true
+---
+
+You are an expert backend engineer. Generate a production-grade, minimal necessary, no-duplicates, module-based FastAPI backend with PostgreSQL, orjson for fast JSON, and JWT authentication (access + refresh). The code must be clean, simple, and easy to remember: use short clear class and variable names (User, Role, Device, Order, Payment, Assign). Do not create fallbacks or extra optional features — only what is required for a robust production-ready API.
+
+Requirements and constraints:
+ 1. Framework & libs
+ • FastAPI (async), run with Uvicorn.
+ • Use orjson for request/response serialization and Pydantic models.
+ • Async DB access using SQLAlchemy 1.4+ async or SQLModel with asyncpg. Include Alembic-ready migrations structure.
+ • Password hashing with passlib (bcrypt).
+ • JWT implementation using python-jose or PyJWT with ACCESS and REFRESH tokens.
+ • Environment variables via python-dotenv or pydantic.BaseSettings.
+ 2. Architecture & file layout (module-based)
+ • app/
+ • main.py (FastAPI app, middleware, include routers)
+ • core/config.py (settings)
+ • db/__init__.py (engine, session dependency)
+ • models/ (SQLAlchemy or SQLModel models)
+ • schemas/ (Pydantic DTOs)
+ • users/index.py (router, controllers, CRUD for users and auth)
+ • roles/index.py
+ • devices/index.py
+ • orders/index.py
+ • payments/index.py
+ • assigns/index.py
+ • utils/security.py (hash, jwt helpers)
+ • crud/ (optional small helpers if needed)
+ • alembic/ (migration config)
+ 3. Database tables & columns (minimum required)
+ • users: id (pk), full_name, phone (unique), password_hash, profile_picture, created_at
+ • roles: id, name (enum-like), created_at
+ • role_enroll: id, user_id, role_id
+ • devices: id, brand, model, type, serial_number, owner_id
+ • orders: id, device_id, cost, discount, total_cost, note, status (Pending, Repairing, Completed, Cancelled), created_at
+ • order_assign: id, order_id, user_id, assigned_at
+ • payments: id, order_id, due_amount, amount, status (Paid, Due, Unpaid), created_at
+ • refresh_tokens: id, user_id, token, expires_at, created_at
+ • All FKs must have ON DELETE CASCADE where appropriate.
+ 4. Auth & flows
+ • Register: create user, hash password, return user DTO (no token).
+ • Login: verify password, return access token (short expiry) and refresh token (long expiry). Store refresh token in refresh_tokens.
+ • Refresh: exchange valid refresh token for a new access token; refresh token rotation is optional but storing and validating refresh token in DB is required.
+ • Protected routes: dependency to get current_user from access token and guard endpoints by role when needed.
+ 5. Endpoints (minimum)
+ • POST /auth/register
+ • POST /auth/login
+ • POST /auth/refresh
+ • POST /auth/logout (revoke refresh token)
+ • CRUD for /users, /devices, /orders, /payments, /assigns, /roles
+ • GET /users list with pagination (limit, offset)
+ • GET /orders/{id} and GET /orders list with basic filters (status)
+ 6. Performance & production practices
+ • Use ORJSONResponse globally for JSON responses.
+ • Use async DB sessions and properly close them via dependencies.
+ • Validate request bodies with Pydantic and avoid ORM models leaking into API responses.
+ • Add timestamps (created_at, updated_at) where useful.
+ • Use typed function signatures everywhere.
+ • Use environment-configured secrets (JWT_SECRET, DB_URL), and document minimal .env example in README.
+ 7. Deliverables
+ • Provide full file structure and content for all files above.
+ • Include requirements.txt with precise package names.
+ • Provide a short README.md with run and migration commands (alembic init/migrate/upgrade, uvicorn command).
+ • Keep code minimal but complete and ready to run. No scaffolding commentary, no extra features.
+ 8. Coding style
+ • Clear variable/class names (User, Role, Device, Order, Payment, Assign).
+
+Prasanga, [11/9/2025 5:59 PM]
+• Short, memorable names for functions (get_user, create_order, assign_order).
+ • Keep functions small and focused.
+ • Add concise docstrings for public functions and endpoints.
+
+Produce the code only (no extra explanation), organized by files with paths and the file contents. Keep files minimal but runnable after installing requirements and setting environment variables. End of prompt.
+
