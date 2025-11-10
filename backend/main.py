@@ -8,12 +8,7 @@ from fastapi.exception_handlers import (
 )
 from sqlalchemy.exc import SQLAlchemyError
 from core.config import settings
-from users.auth import router as auth_router
-from users.index import router as users_router
-from devices.index import router as devices_router
-from orders.index import router as orders_router
-from payments.index import router as payments_router
-from assigns.index import router as assigns_router
+from apps.api.v1 import api_router
 
 app = FastAPI(
     title="Laptop Repair Store Management API",
@@ -29,12 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/v1")
-app.include_router(users_router, prefix="/v1")
-app.include_router(devices_router, prefix="/v1")
-app.include_router(orders_router, prefix="/v1")
-app.include_router(payments_router, prefix="/v1")
-app.include_router(assigns_router, prefix="/v1")
+app.include_router(api_router)
 
 
 @app.exception_handler(SQLAlchemyError)
