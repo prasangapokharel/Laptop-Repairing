@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DB_PORT: int = 3306
     DB_NAME: str = "repair"
     DB_USER: str = "root"
-    DB_PASSWORD: str = "123456"
+    DB_PASSWORD: str = ""
     JWT_SECRET_KEY: str = "your-super-secret-jwt-key-change-this-in-production-12345678"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_HOURS: int = 24
