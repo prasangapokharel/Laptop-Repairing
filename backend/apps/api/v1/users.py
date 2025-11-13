@@ -40,41 +40,6 @@ async def list_users(
     return result.scalars().all()
 
 
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
-
-@router.patch("/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    update_data = user_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(user, field, value)
-    
-    await db.commit()
-    await db.refresh(user)
-    return user
-
-
-@router.delete("/{user_id}", status_code=204)
-async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    await db.delete(user)
-    await db.commit()
-
-
 @router.post("/roles", response_model=RoleResponse, status_code=201)
 async def create_role(role_data: RoleCreate, db: AsyncSession = Depends(get_db)):
     existing = await db.execute(select(Role).where(Role.name == role_data.name))
@@ -110,4 +75,39 @@ async def enroll_role(enroll_data: RoleEnrollCreate, db: AsyncSession = Depends(
     await db.commit()
     await db.refresh(enroll)
     return enroll
+
+
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@router.patch("/{user_id}", response_model=UserResponse)
+async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    update_data = user_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(user, field, value)
+    
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+@router.delete("/{user_id}", status_code=204)
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    await db.delete(user)
+    await db.commit()
 

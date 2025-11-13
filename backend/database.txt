@@ -1,0 +1,12 @@
+Dashboard
+
+New order(Issue title , problem description, estimation completion_date , Action (progess ))
+
+
+
+Accountant
+-Payment
+
+
+Receiptionist
+Create Order (Issue_title,Choose device type , description, total_cost )

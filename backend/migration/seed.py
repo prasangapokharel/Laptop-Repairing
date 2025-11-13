@@ -222,6 +222,7 @@ async def seed_database():
             ("Jane Reception", "reception@repair.com", "1234567892", "reception123", True, False, ["Reception"]),
             ("Bob Accountant", "accountant@repair.com", "1234567893", "accountant123", True, False, ["Accountant"]),
             ("Alice Customer", "customer@repair.com", "1234567894", "customer123", True, False, ["Customer"]),
+            ("Test User", "test@repair.com", "9876543210", "password123", True, False, ["Customer", "Reception"]),
         ]
         
         user_ids = {}
@@ -270,7 +271,42 @@ async def seed_database():
                             }
                         )
         
-        print("[SUCCESS] All seed data inserted successfully!")
+        # 8. Seed Sample Devices
+        print("Seeding sample devices...")
+        device_count = 0
+        if user_ids and brand_ids and model_ids and device_type_ids:
+            # Get first customer user
+            customer_phone = "1234567894"  # Alice Customer
+            if customer_phone in user_ids:
+                customer_user_id = user_ids[customer_phone]
+                # Create a few sample devices
+                sample_devices = [
+                    ("SN001", "Laptop", "Apple", "MacBook Pro"),
+                    ("SN002", "Laptop", "Dell", "XPS 13"),
+                    ("SN003", "Laptop", "HP", "Pavilion")
+                ]
+                for serial, dt_name, brand_name, model_name in sample_devices:
+                    if dt_name in device_type_ids and brand_name in brand_ids:
+                        model_key = f"{brand_name}_{model_name}"
+                        if model_key in model_ids:
+                            await conn.execute(
+                                text("""
+                                    INSERT INTO devices (brand_id, model_id, device_type_id, serial_number, owner_id, notes) 
+                                    VALUES (:brand_id, :model_id, :device_type_id, :serial_number, :owner_id, :notes)
+                                    ON DUPLICATE KEY UPDATE notes = VALUES(notes)
+                                """),
+                                {
+                                    "brand_id": brand_ids[brand_name],
+                                    "model_id": model_ids[model_key],
+                                    "device_type_id": device_type_ids[dt_name],
+                                    "serial_number": serial,
+                                    "owner_id": customer_user_id,
+                                    "notes": f"Sample {dt_name} device"
+                                }
+                            )
+                            device_count += 1
+        
+        print("\n[SUCCESS] All seed data inserted successfully!")
         print(f"  - {len(roles_data)} roles")
         print(f"  - {len(device_types_data)} device types")
         print(f"  - {len(brands_data)} brands")
@@ -278,6 +314,10 @@ async def seed_database():
         print(f"  - {len(problems_data)} problems")
         print(f"  - {len(cost_settings)} cost settings")
         print(f"  - {len(users_data)} users")
+        print(f"  - {device_count} devices")
+        print("\nTest User Credentials:")
+        print("  Phone: 9876543210")
+        print("  Password: password123")
 
 
 async def main():
