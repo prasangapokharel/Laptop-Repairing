@@ -19,6 +19,7 @@ async def seed_database():
             ("Admin", "System administrator with full access"),
             ("Technician", "Repair technician who handles device repairs"),
             ("Reception", "Reception staff who handles customer service"),
+            ("Receptionist", "Reception staff who handles customer service"),
             ("Accountant", "Accountant who manages financial transactions"),
             ("Customer", "Customer who uses the service")
         ]
@@ -218,11 +219,11 @@ async def seed_database():
         print("Seeding sample users...")
         users_data = [
             ("Admin User", "admin@repair.com", "1234567890", "admin123", True, True, ["Admin"]),
-            ("John Technician", "tech@repair.com", "1234567891", "tech123", True, False, ["Technician"]),
-            ("Jane Reception", "reception@repair.com", "1234567892", "reception123", True, False, ["Reception"]),
-            ("Bob Accountant", "accountant@repair.com", "1234567893", "accountant123", True, False, ["Accountant"]),
-            ("Alice Customer", "customer@repair.com", "1234567894", "customer123", True, False, ["Customer"]),
-            ("Test User", "test@repair.com", "9876543210", "password123", True, False, ["Customer", "Reception"]),
+            ("John Technician", "tech@repair.com", "1234567891", "password123", True, False, ["Technician"]),
+            ("Jane Reception", "reception@repair.com", "1234567892", "password123", True, False, ["Reception", "Receptionist"]),
+            ("Bob Accountant", "accountant@repair.com", "1234567893", "password123", True, False, ["Accountant"]),
+            ("Alice Customer", "customer@repair.com", "1234567894", "password123", True, False, ["Customer"]),
+            ("Test User", "test@repair.com", "9876543210", "password123", True, False, ["Customer", "Reception", "Receptionist"]),
         ]
         
         user_ids = {}
@@ -275,11 +276,13 @@ async def seed_database():
         print("Seeding sample devices...")
         device_count = 0
         if user_ids and brand_ids and model_ids and device_type_ids:
-            # Get first customer user
+            # Get customer users
             customer_phone = "1234567894"  # Alice Customer
+            test_user_phone = "9876543210"  # Test User
+            
+            # Create devices for Alice Customer
             if customer_phone in user_ids:
                 customer_user_id = user_ids[customer_phone]
-                # Create a few sample devices
                 sample_devices = [
                     ("SN001", "Laptop", "Apple", "MacBook Pro"),
                     ("SN002", "Laptop", "Dell", "XPS 13"),
@@ -293,7 +296,7 @@ async def seed_database():
                                 text("""
                                     INSERT INTO devices (brand_id, model_id, device_type_id, serial_number, owner_id, notes) 
                                     VALUES (:brand_id, :model_id, :device_type_id, :serial_number, :owner_id, :notes)
-                                    ON DUPLICATE KEY UPDATE notes = VALUES(notes)
+                                    ON DUPLICATE KEY UPDATE owner_id = VALUES(owner_id), notes = VALUES(notes)
                                 """),
                                 {
                                     "brand_id": brand_ids[brand_name],
@@ -302,6 +305,36 @@ async def seed_database():
                                     "serial_number": serial,
                                     "owner_id": customer_user_id,
                                     "notes": f"Sample {dt_name} device"
+                                }
+                            )
+                            device_count += 1
+            
+            # Create devices for Test User (9876543210) - this is the main test user
+            if test_user_phone in user_ids:
+                test_user_id = user_ids[test_user_phone]
+                test_devices = [
+                    ("SN100", "Laptop", "Apple", "MacBook Pro"),
+                    ("SN101", "Laptop", "Dell", "XPS 13"),
+                    ("SN102", "Laptop", "HP", "Pavilion"),
+                    ("SN103", "Laptop", "Lenovo", "ThinkPad"),
+                ]
+                for serial, dt_name, brand_name, model_name in test_devices:
+                    if dt_name in device_type_ids and brand_name in brand_ids:
+                        model_key = f"{brand_name}_{model_name}"
+                        if model_key in model_ids:
+                            await conn.execute(
+                                text("""
+                                    INSERT INTO devices (brand_id, model_id, device_type_id, serial_number, owner_id, notes) 
+                                    VALUES (:brand_id, :model_id, :device_type_id, :serial_number, :owner_id, :notes)
+                                    ON DUPLICATE KEY UPDATE owner_id = VALUES(owner_id), notes = VALUES(notes)
+                                """),
+                                {
+                                    "brand_id": brand_ids[brand_name],
+                                    "model_id": model_ids[model_key],
+                                    "device_type_id": device_type_ids[dt_name],
+                                    "serial_number": serial,
+                                    "owner_id": test_user_id,
+                                    "notes": f"Test device for user {test_user_phone}"
                                 }
                             )
                             device_count += 1
@@ -316,8 +349,14 @@ async def seed_database():
         print(f"  - {len(users_data)} users")
         print(f"  - {device_count} devices")
         print("\nTest User Credentials:")
-        print("  Phone: 9876543210")
-        print("  Password: password123")
+        print("  Receptionist/Test User:")
+        print("    Phone: 9876543210")
+        print("    Password: password123")
+        print("    Roles: Customer, Reception, Receptionist")
+        print("  Technician User:")
+        print("    Phone: 1234567891")
+        print("    Password: password123")
+        print("    Roles: Technician")
 
 
 async def main():
