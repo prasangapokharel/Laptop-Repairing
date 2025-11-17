@@ -1,5 +1,23 @@
 from pydantic_settings import BaseSettings
 from typing import List
+from pathlib import Path
+
+
+def get_env_file():
+    """Get .env file path with fallback to .env.development or .env.production"""
+    backend_dir = Path(__file__).parent.parent
+    
+    env_files = [
+        backend_dir / ".env",
+        backend_dir / ".env.development",
+        backend_dir / ".env.production"
+    ]
+    
+    for env_file in env_files:
+        if env_file.exists():
+            return str(env_file)
+    
+    return None
 
 
 class Settings(BaseSettings):
@@ -29,7 +47,7 @@ class Settings(BaseSettings):
         return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?charset=utf8mb4"
 
     class Config:
-        env_file = ".env"
+        env_file = get_env_file()
         case_sensitive = True
 
 
