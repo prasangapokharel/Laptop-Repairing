@@ -1,0 +1,41 @@
+@startuml workflow
+skinparam style strict
+skinparam titleFontSize 18
+skinparam defaultFontSize 12
+
+title Laptop Repair Order Workflow
+
+start
+
+partition "Customer (Binisha)" as Customer {
+    :View Dashboard / Create Order Request;
+}
+
+partition "Receptionist (Binisha)" as Receptionist {
+    :Register Customer (P. 8);
+    :Create Order (P. 9) & Initial Estimate;
+    :Assign Technician (P. 10);
+    :Update Status to Assigned;
+}
+
+partition "Technician (Rakesh)" as Technician {
+    :View Assigned Orders (P. 27);
+    :Perform Device Inspection (P. 31);
+    :Start Repair Work (P. 28);
+    repeat
+        :Update Work Progress Notes (P. 30);
+    repeat while (Work Complete?)
+    :Finalize Costs & Update Status to 'Ready for Pickup' (P. 29);
+}
+
+partition "Accountant (Sweta)" as Accountant {
+    :Receive Payment Notification;
+    :Record Payment & Generate Receipt (P. 25);
+    :Handover Device;
+}
+
+Receptionist --> Accountant : Handover for Final Payment
+Customer -> Accountant : Process Payment (P. 5, P. 22)
+
+stop
+@enduml
