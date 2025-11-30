@@ -89,7 +89,7 @@ echo Press Ctrl+C to stop the server
 echo.
 
 REM Start server
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python run.py
 if errorlevel 1 (
     echo.
     echo [ERROR] Failed to start server
