@@ -13,7 +13,7 @@ import {
   SquarePen,
   Headset,
   PlusCircle,
-  LogOut,         // ← Missing import added
+  LogOut,         
 } from "lucide-react";
 
 import HomePage from "./customers/HomePage";
