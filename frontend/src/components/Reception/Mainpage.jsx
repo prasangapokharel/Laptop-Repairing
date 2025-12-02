@@ -77,7 +77,7 @@ const Mainpage = () => {
       {/* Header */}
       <div className="bg-[#2563EB] rounded-xl p-6 flex justify-between items-center text-white shadow-md mb-6">
         <h1 className="text-2xl font-bold">Reception Dashboard</h1>
-        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50">
+        <button className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-50">
           Generate Report
         </button>
       </div>
@@ -113,12 +113,12 @@ const Mainpage = () => {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[600px]">
                 <thead>
-                  <tr className="text-left text-black font-bold border-b border-gray-300">
-                    <th className="pb-3 px-4">Order ID</th>
-                    <th className="pb-3 px-4">Customer</th>
-                    <th className="pb-3 px-4">Order Type</th>
-                    <th className="pb-3 px-4">Device</th>
-                    <th className="pb-3 px-4 text-center">Status</th>
+                  <tr className="text-left text-black  border-b border-gray-300">
+                    <th className="pb-3 px-4 text-sm">Order ID</th>
+                    <th className="pb-3 px-4 text-sm">Customer</th>
+                    <th className="pb-3 px-4 text-sm">Order Type</th>
+                    <th className="pb-3 px-4 text-sm">Device</th>
+                    <th className="pb-3 px-4 text-center text-sm">Status</th>
                   </tr>
                 </thead>
 
